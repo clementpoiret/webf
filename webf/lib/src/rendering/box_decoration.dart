@@ -3,8 +3,10 @@
  * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:webf/css.dart';
+import 'package:webf/foundation.dart';
 import 'package:webf/rendering.dart';
 
 mixin RenderBoxDecorationMixin on RenderBoxModelBase {
@@ -27,6 +29,11 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
     if (decoration == null) return;
+
+    if (!kReleaseMode) {
+      WebFProfiler.instance.startTrackPaintStep('paintBackground');
+    }
+
     _painter ??= BoxDecorationPainter(padding, renderStyle, markNeedsPaint);
 
     final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
@@ -58,6 +65,10 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       _painter!.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
+
+    if (!kReleaseMode) {
+      WebFProfiler.instance.finishTrackPaintStep();
+    }
   }
 
   void paintDecoration(PaintingContext context, Offset offset, PaintingContextCallback callback) {
@@ -65,18 +76,39 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
-    if (decoration == null) return callback(context, offset);
+    if (decoration == null) {
+      return callback(context, offset);
+    }
+
+    if (!kReleaseMode) {
+      WebFProfiler.instance.startTrackPaintStep('paintDecoration');
+      WebFProfiler.instance.startTrackPaintSubStep('renderStyle.padding.resolve');
+    }
 
     EdgeInsets? padding = renderStyle.padding.resolve(TextDirection.ltr);
     _painter ??= BoxDecorationPainter(padding, renderStyle, markNeedsPaint);
 
+    if (!kReleaseMode) {
+      WebFProfiler.instance.finishTrackPaintSubStep(padding.toString());
+      WebFProfiler.instance.startTrackPaintSubStep('imageConfiguration.copyWith');
+    }
+
     final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
+
+    if (!kReleaseMode) {
+      WebFProfiler.instance.finishTrackPaintSubStep(filledConfiguration.toString());
+    }
+
     if (decorationPosition == DecorationPosition.background) {
       int? debugSaveCount;
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
         return true;
       }());
+
+      if (!kReleaseMode) {
+        WebFProfiler.instance.startTrackPaintSubStep('_painter!.paint($decorationPosition)');
+      }
 
       _painter!.paint(context.canvas, offset, filledConfiguration);
       assert(() {
@@ -94,14 +126,30 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
         return true;
       }());
       if (decoration.isComplex) context.setIsComplexHint();
+
+      if (!kReleaseMode) {
+        WebFProfiler.instance.finishTrackPaintSubStep(null);
+      }
     }
     Offset contentOffset;
     EdgeInsets borderEdge = renderStyle.border;
     contentOffset = offset.translate(borderEdge.left, borderEdge.top);
     super.paint(context, contentOffset);
     if (decorationPosition == DecorationPosition.foreground) {
+      if (!kReleaseMode) {
+        WebFProfiler.instance.startTrackPaintSubStep('_painter!.paint($decorationPosition)');
+      }
+
       _painter!.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
+
+      if (!kReleaseMode) {
+        WebFProfiler.instance.finishTrackPaintSubStep(null);
+      }
+    }
+
+    if (!kReleaseMode) {
+      WebFProfiler.instance.finishTrackPaintStep();
     }
 
     callback(context, offset);
