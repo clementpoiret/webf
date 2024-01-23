@@ -677,14 +677,17 @@ class WebFViewController implements WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         document.visibilityChange(VisibilityState.visible);
+        rootController.resume();
         break;
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
         document.visibilityChange(VisibilityState.hidden);
+        rootController.pause();
         break;
       case AppLifecycleState.inactive:
         break;
       case AppLifecycleState.detached:
+        rootController.pause();
         break;
     }
   }
@@ -1117,6 +1120,7 @@ class WebFController {
     _paused = false;
     flushPendingCallbacks();
     module.resumeInterval();
+    SchedulerBinding.instance.scheduleFrame();
   }
 
   bool _disposed = false;
