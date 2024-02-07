@@ -77,8 +77,8 @@ ExecutingContext::ExecutingContext(DartIsolateContext* dart_isolate_context,
   // Install performance
   InstallPerformance();
 
-  initWebFPolyFill(this);
   init_webf_polyfill({.value = this, .method_pointer = rust_method_ptr_.get()});
+  initWebFPolyFill(this);
 
   for (auto& p : plugin_byte_code) {
     EvaluateByteCode(p.second.bytes, p.second.length);
