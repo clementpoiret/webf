@@ -598,8 +598,8 @@ class ImageElement extends Element {
       _dispatchLoadEvent();
       // Decrement load event delay count after decode.
       ownerDocument.decrementLoadEventDelayCount();
-    }, onError: (e) {
-      print(e);
+    }, onError: (e, stack) {
+      print('$e\n$stack');
       _dispatchErrorEvent();
     });
     return;

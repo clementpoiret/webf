@@ -504,13 +504,22 @@ class Document extends ContainerNode {
   }
 
   void flushStyle({bool rebuild = false}) {
+    if (!kReleaseMode) {
+      WebFProfiler.instance.startTrackUICommandStep('Document.flushStyle');
+    }
     if (styleDirtyElements.isEmpty) {
       _recalculating = false;
+      if (!kReleaseMode) {
+        WebFProfiler.instance.finishTrackUICommandStep();
+      }
       return;
     }
     if (!styleNodeManager.updateActiveStyleSheets(rebuild: rebuild)) {
       _recalculating = false;
       styleDirtyElements.clear();
+      if (!kReleaseMode) {
+        WebFProfiler.instance.finishTrackUICommandStep();
+      }
       return;
     }
     if (styleDirtyElements.any((element) {
@@ -525,6 +534,9 @@ class Document extends ContainerNode {
     }
     styleDirtyElements.clear();
     _recalculating = false;
+    if (!kReleaseMode) {
+      WebFProfiler.instance.finishTrackUICommandStep();
+    }
   }
 
   void reactiveWidgetElements() {
