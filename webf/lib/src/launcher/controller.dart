@@ -1194,8 +1194,17 @@ class WebFController {
       _preloadStatus = PreloadingStatus.done;
       controllerPreloadingCompleter.complete();
     } else if (_entrypoint!.isHTML) {
+      EvaluateOpItem? evaluateOpItem;
+      if (!kReleaseMode) {
+        evaluateOpItem = WebFProfiler.instance.startTrackEvaluate('parseHTML');
+      }
+
       // Evaluate the HTML entry point, and loading the stylesheets and scripts.
-      await parseHTML(view.contextId, _entrypoint!.data!);
+      await parseHTML(view.contextId, _entrypoint!.data!, profileOp: evaluateOpItem);
+
+      if (!kReleaseMode) {
+        WebFProfiler.instance.finishTrackEvaluate(evaluateOpItem!);
+      }
 
       // Initialize document, window and the documentElement.
       flushUICommand(view, view.window.pointer!);
@@ -1441,6 +1450,11 @@ class WebFController {
 
     assert(!_view._disposed, 'WebF have already disposed');
     if (_entrypoint != null) {
+      EvaluateOpItem? evaluateOpItem;
+      if (!kReleaseMode) {
+        evaluateOpItem = WebFProfiler.instance.startTrackEvaluate('WebFController.evaluateEntrypoint');
+      }
+
       WebFBundle entrypoint = _entrypoint!;
       double contextId = _view.contextId;
       assert(entrypoint.isResolved, 'The webf bundle $entrypoint is not resolved to evaluate.');
@@ -1452,17 +1466,17 @@ class WebFController {
       if (entrypoint.isJavascript) {
         assert(isValidUTF8String(data), 'The JavaScript codes should be in UTF-8 encoding format');
         // Prefer sync decode in loading entrypoint.
-        await evaluateScripts(contextId, data, url: url);
+        await evaluateScripts(contextId, data, url: url, profileOp: evaluateOpItem);
       } else if (entrypoint.isBytecode) {
-        await evaluateQuickjsByteCode(contextId, data);
+        await evaluateQuickjsByteCode(contextId, data, profileOp: evaluateOpItem);
       } else if (entrypoint.isHTML) {
         assert(isValidUTF8String(data), 'The HTML codes should be in UTF-8 encoding format');
-        await parseHTML(contextId, data);
+        await parseHTML(contextId, data, profileOp: evaluateOpItem);
       } else if (entrypoint.contentType.primaryType == 'text') {
         // Fallback treating text content as JavaScript.
         try {
           assert(isValidUTF8String(data), 'The JavaScript codes should be in UTF-8 encoding format');
-          await evaluateScripts(contextId, data, url: url);
+          await evaluateScripts(contextId, data, url: url, profileOp: evaluateOpItem);
         } catch (error) {
           print('Fallback to execute JavaScript content of $url');
           rethrow;
@@ -1482,6 +1496,10 @@ class WebFController {
         checkCompleted();
       });
       SchedulerBinding.instance.scheduleFrame();
+
+      if (!kReleaseMode) {
+        WebFProfiler.instance.finishTrackEvaluate(evaluateOpItem!);
+      }
     }
   }
 
