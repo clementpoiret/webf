@@ -1168,7 +1168,7 @@ class WebFController {
     // Set the status value for preloading.
     _preloadStatus = PreloadingStatus.preloading;
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackUICommand();
     }
 
@@ -1177,7 +1177,7 @@ class WebFController {
     view.document.documentElement!.createRenderer();
     view.document.documentElement!.ensureChildAttached();
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackUICommand();
     }
 
@@ -1195,14 +1195,14 @@ class WebFController {
       controllerPreloadingCompleter.complete();
     } else if (_entrypoint!.isHTML) {
       EvaluateOpItem? evaluateOpItem;
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         evaluateOpItem = WebFProfiler.instance.startTrackEvaluate('parseHTML');
       }
 
       // Evaluate the HTML entry point, and loading the stylesheets and scripts.
       await parseHTML(view.contextId, _entrypoint!.data!, profileOp: evaluateOpItem);
 
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.finishTrackEvaluate(evaluateOpItem!);
       }
 
@@ -1263,7 +1263,7 @@ class WebFController {
     // Set the status value for preloading.
     _preRenderingStatus = PreRenderingStatus.preloading;
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackUICommand();
     }
 
@@ -1272,7 +1272,7 @@ class WebFController {
     view.document.documentElement!.createRenderer();
     view.document.documentElement!.ensureChildAttached();
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackUICommand();
     }
 
@@ -1451,7 +1451,7 @@ class WebFController {
     assert(!_view._disposed, 'WebF have already disposed');
     if (_entrypoint != null) {
       EvaluateOpItem? evaluateOpItem;
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         evaluateOpItem = WebFProfiler.instance.startTrackEvaluate('WebFController.evaluateEntrypoint');
       }
 
@@ -1497,7 +1497,7 @@ class WebFController {
       });
       SchedulerBinding.instance.scheduleFrame();
 
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.finishTrackEvaluate(evaluateOpItem!);
       }
     }

@@ -235,15 +235,15 @@ class NetworkBundle extends WebFBundle {
     if (data != null) return;
 
     NetworkOpItem? currentProfileOp;
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       currentProfileOp = WebFProfiler.instance.startTrackNetwork(_uri!.toString());
     }
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackNetworkStep(currentProfileOp!, '_sharedHttpClient.getUrl');
     }
     final HttpClientRequest request = await _sharedHttpClient.getUrl(_uri!);
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackNetworkStep(currentProfileOp!);
     }
 
@@ -251,13 +251,13 @@ class NetworkBundle extends WebFBundle {
     request.headers.set('Accept', _acceptHeader());
     additionalHttpHeaders?.forEach(request.headers.set);
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackNetworkStep(currentProfileOp!, 'request.close()');
     }
 
     final HttpClientResponse response = await request.close();
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackNetworkStep(currentProfileOp!);
     }
 
@@ -267,31 +267,31 @@ class NetworkBundle extends WebFBundle {
         IntProperty('HTTP status code', response.statusCode),
       ]);
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackNetworkStep(currentProfileOp!, 'consolidateHttpClientResponseBytes(response)');
     }
     Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackNetworkStep(currentProfileOp!);
     }
 
     // To maintain compatibility with older versions of WebF, which save Gzip content in caches, we should check the bytes
     // and decode them if they are in gzip format.
     if (isGzip(bytes)) {
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.startTrackNetworkStep(currentProfileOp!, 'Uint8List.fromList(gzip.decoder.convert(bytes))');
       }
 
       bytes = Uint8List.fromList(gzip.decoder.convert(bytes));
 
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.finishTrackNetworkStep(currentProfileOp!);
       }
     }
 
     if (bytes.isEmpty) {
       await invalidateCache();
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.finishTrackNetwork(currentProfileOp!);
       }
       return;
@@ -300,7 +300,7 @@ class NetworkBundle extends WebFBundle {
     data = bytes.buffer.asUint8List();
     _contentType = response.headers.contentType ?? ContentType.binary;
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackNetwork(currentProfileOp!);
     }
   }

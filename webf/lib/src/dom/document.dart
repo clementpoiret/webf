@@ -399,12 +399,12 @@ class Document extends ContainerNode {
     assert(viewport!.hasSize);
     documentElement!.renderStyle.width = CSSLengthValue(viewport!.viewportSize.width, CSSLengthType.PX);
     documentElement!.renderStyle.height = CSSLengthValue(viewport!.viewportSize.height, CSSLengthType.PX);
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackUICommand();
     }
     documentElement!.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
     documentElement!.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackUICommand();
     }
   }
@@ -509,12 +509,12 @@ class Document extends ContainerNode {
   }
 
   void flushStyle({bool rebuild = false}) {
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackUICommandStep('Document.flushStyle');
     }
     if (styleDirtyElements.isEmpty) {
       _recalculating = false;
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.finishTrackUICommandStep();
       }
       return;
@@ -522,7 +522,7 @@ class Document extends ContainerNode {
     if (!styleNodeManager.updateActiveStyleSheets(rebuild: rebuild)) {
       _recalculating = false;
       styleDirtyElements.clear();
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.finishTrackUICommandStep();
       }
       return;
@@ -539,7 +539,7 @@ class Document extends ContainerNode {
     }
     styleDirtyElements.clear();
     _recalculating = false;
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackUICommandStep();
     }
   }

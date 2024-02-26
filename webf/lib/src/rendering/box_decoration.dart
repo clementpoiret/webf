@@ -24,7 +24,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
   }
 
   static void paintBackground(WebFPaintingPipeline pipeline, Offset offset, [WebFPaintingContextCallback? callback]) {
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackPaintStep('paintBackground');
     }
 
@@ -73,13 +73,13 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackPaintStep();
     }
   }
 
   static void paintDecoration(WebFPaintingPipeline pipeline, Offset offset, [WebFPaintingContextCallback? callback]) {
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.startTrackPaintStep('paintDecoration');
     }
 
@@ -91,7 +91,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
     if (decoration == null) {
-      if (!kReleaseMode) {
+      if (enableWebFProfileTracking) {
         WebFProfiler.instance.finishTrackPaintStep();
       }
       return pipeline.paintOverflow(pipeline, offset);
@@ -131,7 +131,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
 
-    if (!kReleaseMode) {
+    if (enableWebFProfileTracking) {
       WebFProfiler.instance.finishTrackPaintStep();
     }
 
